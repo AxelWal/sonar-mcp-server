@@ -19,7 +19,7 @@ type SecurityHotspotsResponse struct {
 func AddHotspotsTool(s *server.MCPServer) {
 	// create a new MCP tool for searching security hotspots
 	hotspotsTool := mcp.NewTool("sonar_hotspots",
-		mcp.WithDescription("Search and get security hotpots in the source files of a Sonar project."),
+		mcp.WithDescription("Search and get security hotpots in the source files of a specified Sonar project."),
 		mcp.WithString("projectKey",
 			mcp.Description("Key of the project or application, e.g. my_project."),
 			mcp.Required(),
