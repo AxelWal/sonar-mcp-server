@@ -1,23 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"flag"
+	"log"
 
+	"github.com/lreimer/sonar-mcp-server/sonar"
 	"github.com/mark3labs/mcp-go/server"
 )
 
-var SonarToken string
-
-func init() {
-	SonarToken = os.Getenv("SONAR_TOKEN")
-	if SonarToken == "" {
-		fmt.Println("SONAR_TOKEN environment variable is not set")
-		os.Exit(1)
-	}
-}
-
 func main() {
+	var transport string
+	flag.StringVar(&transport, "t", "stdio", "Transport type (stdio or sse)")
+	flag.Parse()
+
 	// Create a new MCP server
 	s := server.NewMCPServer(
 		"Sonarcloud API",
@@ -28,10 +23,21 @@ func main() {
 	)
 
 	// add the individual tools
-	AddSonarProjectsTool(s)
+	sonar.AddProjectsTool(s)
+	sonar.AddHotspotsTool(s)
+	sonar.AddIssuesTool(s)
+	sonar.AddDuplicationsTool(s)
 
-	// Start the server
-	if err := server.ServeStdio(s); err != nil {
-		fmt.Printf("Sonar MCP server error: %v\n", err)
+	// Only check for "sse" since stdio is the default
+	if transport == "sse" {
+		sseServer := server.NewSSEServer(s, server.WithBaseURL("http://localhost:8080"))
+		log.Printf("Sonar MCP Server (SSE) listening on :8080")
+		if err := sseServer.Start(":8080"); err != nil {
+			log.Fatalf("Sonar MCP Server (SSE) error: %v", err)
+		}
+	} else {
+		if err := server.ServeStdio(s); err != nil {
+			log.Fatalf("Sonar MCP Server (stdio) error: %v", err)
+		}
 	}
 }

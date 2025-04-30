@@ -1,4 +1,4 @@
-package main
+package sonar
 
 import (
 	"context"
@@ -32,7 +32,7 @@ type ProjectsResponse struct {
 	Components []Projects `json:"components"`
 }
 
-func AddSonarProjectsTool(s *server.MCPServer) {
+func AddProjectsTool(s *server.MCPServer) {
 	// Create a new MCP tool for listing Sonar projects
 	projectsTool := mcp.NewTool("sonar_projects",
 		mcp.WithDescription("List all Sonar cloud projects for a given organization"),
@@ -48,7 +48,7 @@ func AddSonarProjectsTool(s *server.MCPServer) {
 		organization := request.Params.Arguments["organization"].(string)
 
 		// Call the Sonarcloud API to get the projects
-		projects, err := getSonarProjects(organization)
+		projects, err := getProjects(organization)
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("unable to retrieve sonar projects.", err), nil
 		}
@@ -58,7 +58,7 @@ func AddSonarProjectsTool(s *server.MCPServer) {
 	})
 }
 
-func getSonarProjects(organization string) (string, error) {
+func getProjects(organization string) (string, error) {
 	url := fmt.Sprintf("https://sonarcloud.io/api/projects/search?organization=%s", organization)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -67,7 +67,7 @@ func getSonarProjects(organization string) (string, error) {
 	}
 
 	// Set the authorization header using the global sonarToken
-	req.SetBasicAuth(SonarToken, "")
+	req.SetBasicAuth("", "")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -93,14 +93,4 @@ func getSonarProjects(organization string) (string, error) {
 	}
 
 	return prettyPrint(projectsResponse.Components)
-}
-
-func prettyPrint(data any) (string, error) {
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal data: %w", err)
-	}
-
-	// Return the pretty-printed JSON as a string
-	return string(jsonData), nil
 }
