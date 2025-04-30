@@ -5,8 +5,9 @@ An MCP server implementation for the SonarQube Cloud API in Golang.
 ## Build and Deploy
 
 ```bash
-go build
-goreleaser 
+# to quickly build the latest snapshot
+goreleaser build --snapshot
+goreleaser release --skip=publish --snapshot
 ```
 
 ## Usage Instructions
