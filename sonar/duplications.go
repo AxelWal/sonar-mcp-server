@@ -26,7 +26,7 @@ func AddDuplicationsTool(s *server.MCPServer) {
 			// we might need to split the key into project and file
 			mcp.Description("The file key (optional), e.g. my_project:/src/foo/Bar.php"),
 		),
-		mcp.WithString("pull_request",
+		mcp.WithString("pullRequest",
 			mcp.Description("The pull request key (optional), e.g. 5461"),
 		),
 	)
@@ -36,7 +36,7 @@ func AddDuplicationsTool(s *server.MCPServer) {
 		// extract the parameters from the request
 		branch := request.Params.Arguments["branch"].(string)
 		key := request.Params.Arguments["key"].(string)
-		pullRequest := request.Params.Arguments["pull_request"].(string)
+		pullRequest := request.Params.Arguments["pullRequest"].(string)
 
 		// call the Sonarcloud API to get the duplications
 		duplications, err := showDuplications(branch, key, pullRequest)
