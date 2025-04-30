@@ -7,6 +7,12 @@ import (
 	"net/http"
 )
 
+type Paging struct {
+	PageIndex int `json:"pageIndex"`
+	PageSize  int `json:"pageSize"`
+	Total     int `json:"total"`
+}
+
 func prettyPrint(data any) (string, error) {
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {

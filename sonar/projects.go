@@ -9,12 +9,6 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-type Paging struct {
-	PageIndex int `json:"pageIndex"`
-	PageSize  int `json:"pageSize"`
-	Total     int `json:"total"`
-}
-
 type Projects struct {
 	Organization     string `json:"organization"`
 	Key              string `json:"key"`
