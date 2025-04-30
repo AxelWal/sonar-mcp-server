@@ -8,6 +8,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+var version = "dev"
+
 func main() {
 	var transport string
 	flag.StringVar(&transport, "t", "stdio", "Transport type (stdio or sse)")
@@ -16,7 +18,7 @@ func main() {
 	// Create a new MCP server
 	s := server.NewMCPServer(
 		"Sonarcloud API",
-		"1.0.0",
+		version,
 		server.WithResourceCapabilities(true, true),
 		server.WithRecovery(),
 		server.WithLogging(),
