@@ -9,22 +9,6 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-type DuplicationBlock struct {
-	From int    `json:"from"`
-	Size int    `json:"size"`
-	Ref  string `json:"_ref"`
-}
-
-type Duplication struct {
-	Blocks []DuplicationBlock `json:"blocks"`
-}
-
-type File struct {
-	Key         string `json:"key"`
-	Name        string `json:"name"`
-	ProjectName string `json:"projectName"`
-}
-
 type DuplicationsResponse struct {
 	Duplications []Duplication   `json:"duplications"`
 	Files        map[string]File `json:"files"`

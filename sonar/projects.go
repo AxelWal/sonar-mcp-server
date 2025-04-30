@@ -9,16 +9,6 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-type Projects struct {
-	Organization     string `json:"organization"`
-	Key              string `json:"key"`
-	Name             string `json:"name"`
-	Qualifier        string `json:"qualifier"`
-	Visibility       string `json:"visibility"`
-	LastAnalysisDate string `json:"lastAnalysisDate"`
-	Revision         string `json:"revision"`
-}
-
 type ProjectsResponse struct {
 	Paging     Paging     `json:"paging"`
 	Components []Projects `json:"components"`
