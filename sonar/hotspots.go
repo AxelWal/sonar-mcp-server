@@ -1,6 +1,14 @@
 package sonar
 
-import "github.com/mark3labs/mcp-go/server"
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
+)
 
 type TextRange struct {
 	StartLine   int `json:"startLine"`
@@ -42,5 +50,61 @@ type SecurityHotspotsResponse struct {
 }
 
 func AddHotspotsTool(s *server.MCPServer) {
-	panic("unimplemented")
+	// create a new MCP tool for searching security hotspots
+	hotspotsTool := mcp.NewTool("sonar_hotspots",
+		mcp.WithDescription("Search and get security hotpots in the source files of a Sonar project."),
+		mcp.WithString("projectKey",
+			mcp.Description("Key of the project or application, e.g. my_project."),
+			mcp.Required(),
+		),
+		mcp.WithArray("files",
+			mcp.Description("Array or list of file paths. Returns only hotspots found in those files, e.g. src/foo/Bar.php. This parameter is optional."),
+		),
+		mcp.WithString("status",
+			mcp.Description("The status of the security hotspot, only these are returned, e.g. TO_REVIEW, REVIEWED. This parameter is optional."),
+			mcp.Enum("TO_REVIEW", "REVIEWED"),
+		),
+	)
+
+	// add the tool to the server
+	s.AddTool(hotspotsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		// extract the parameters from the request
+		projectKey := request.Params.Arguments["projectKey"].(string)
+		files := request.Params.Arguments["files"].([]string)
+		status := request.Params.Arguments["status"].(string)
+
+		// call the Sonarcloud API to get the hotspots
+		duplications, err := searchHotspots(projectKey, files, status)
+		if err != nil {
+			return mcp.NewToolResultErrorFromErr("unable to retrieve security hotspots.", err), nil
+		}
+
+		return mcp.NewToolResultText(duplications), nil
+	})
+}
+
+func searchHotspots(projectKey string, files []string, status string) (string, error) {
+	filesParam := ""
+	if len(files) > 0 {
+		filesParam = fmt.Sprintf("&files=%s", strings.Join(files, ","))
+	}
+	statusParam := ""
+	if status != "" {
+		statusParam = fmt.Sprintf("&status=%s", status)
+	}
+
+	url := fmt.Sprintf("https://sonarcloud.io/api/hotspots/search?projectKey=%s%s%s", projectKey, filesParam, statusParam)
+
+	body, err := performGetRequest(url)
+	if err != nil {
+		return "", err
+	}
+
+	var response SecurityHotspotsResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal response body: %w", err)
+	}
+
+	return prettyPrint(response)
 }

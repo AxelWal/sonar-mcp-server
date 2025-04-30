@@ -25,22 +25,22 @@ type ProjectsResponse struct {
 }
 
 func AddProjectsTool(s *server.MCPServer) {
-	// Create a new MCP tool for listing Sonar projects
+	// create a new MCP tool for listing Sonar projects
 	projectsTool := mcp.NewTool("sonar_projects",
-		mcp.WithDescription("List all Sonar cloud projects for a given organization"),
+		mcp.WithDescription("List all Sonar projects for a given organization."),
 		mcp.WithString("organization",
+			mcp.Description("The Sonar cloud organization name, e.g. my_organization."),
 			mcp.Required(),
-			mcp.Description("The Sonar cloud organization name"),
 		),
 	)
 
-	// Add the tool to the server
+	// add the tool to the server
 	s.AddTool(projectsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract the organization name from the request
 		organization := request.Params.Arguments["organization"].(string)
 
 		// Call the Sonarcloud API to get the projects
-		projects, err := getProjects(organization)
+		projects, err := searchProjects(organization)
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("unable to retrieve sonar projects.", err), nil
 		}
@@ -50,7 +50,7 @@ func AddProjectsTool(s *server.MCPServer) {
 	})
 }
 
-func getProjects(organization string) (string, error) {
+func searchProjects(organization string) (string, error) {
 	url := fmt.Sprintf("https://sonarcloud.io/api/projects/search?organization=%s", organization)
 
 	body, err := performGetRequest(url)

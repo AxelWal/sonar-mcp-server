@@ -31,11 +31,12 @@ type DuplicationsResponse struct {
 }
 
 func AddDuplicationsTool(s *server.MCPServer) {
-	// create a new MCP tool for listing Sonar projects
+	// create a new MCP tool for showing duplications
 	duplicationsTool := mcp.NewTool("sonar_duplications",
-		mcp.WithDescription("Get duplications between source files, either within a branch or pull request or for a file in the project."),
+		mcp.WithDescription("Show duplications between source files, either within a branch or pull request or for a file in a Sonar project."),
 		mcp.WithString("branch",
 			mcp.Description("The SCM branch key or name (optional), e.g. feature/my_branch"),
+			mcp.DefaultString("main"),
 		),
 		mcp.WithString("key",
 			// we might need to split the key into project and file
@@ -53,19 +54,27 @@ func AddDuplicationsTool(s *server.MCPServer) {
 		key := request.Params.Arguments["key"].(string)
 		pullRequest := request.Params.Arguments["pull_request"].(string)
 
-		// Call the Sonarcloud API to get the projects
-		duplications, err := getDuplications(branch, key, pullRequest)
+		// call the Sonarcloud API to get the duplications
+		duplications, err := showDuplications(branch, key, pullRequest)
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("unable to retrieve duplications.", err), nil
 		}
 
-		// Return the projects as a result
 		return mcp.NewToolResultText(duplications), nil
 	})
 }
 
-func getDuplications(branch, key, pullRequest string) (string, error) {
-	url := fmt.Sprintf("https://sonarcloud.io/api/duplications/show?branch=%s&key=%s&pullRequest=%s", branch, key, pullRequest)
+func showDuplications(branch, key, pullRequest string) (string, error) {
+	keyParam := ""
+	if key != "" {
+		keyParam = fmt.Sprintf("&key=%s", key)
+	}
+	pullRequestParam := ""
+	if pullRequest != "" {
+		pullRequestParam = fmt.Sprintf("&pullRequest=%s", pullRequest)
+	}
+
+	url := fmt.Sprintf("https://sonarcloud.io/api/duplications/show?branch=%s%s%s", branch, keyParam, pullRequestParam)
 
 	body, err := performGetRequest(url)
 	if err != nil {
