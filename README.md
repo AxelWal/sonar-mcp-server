@@ -29,6 +29,8 @@ configuration for the MCP server.
 }
 ```
 
+There is also an HTTP (SSE) mode implemented.
+
 ## Maintainer
 
 M.-Leander Reimer (@lreimer), <mario-leander.reimer@qaware.de>
