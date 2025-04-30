@@ -67,7 +67,7 @@ func getProjects(organization string) (string, error) {
 	}
 
 	// Set the authorization header using the global sonarToken
-	req.SetBasicAuth("", "")
+	req.SetBasicAuth(getSonarToken(), "")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
