@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -61,31 +59,11 @@ func AddProjectsTool(s *server.MCPServer) {
 func getProjects(organization string) (string, error) {
 	url := fmt.Sprintf("https://sonarcloud.io/api/projects/search?organization=%s", organization)
 
-	req, err := http.NewRequest("GET", url, nil)
+	body, err := performGetRequest(url)
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return "", err
 	}
 
-	// Set the authorization header using the global sonarToken
-	req.SetBasicAuth(getSonarToken(), "")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to perform request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	// Unmarshal the response body into the SonarProjects type
 	var projectsResponse ProjectsResponse
 	err = json.Unmarshal(body, &projectsResponse)
 	if err != nil {

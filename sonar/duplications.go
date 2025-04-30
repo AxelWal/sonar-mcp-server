@@ -2,6 +2,8 @@ package sonar
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -29,7 +31,7 @@ type DuplicationsResponse struct {
 }
 
 func AddDuplicationsTool(s *server.MCPServer) {
-	// Create a new MCP tool for listing Sonar projects
+	// create a new MCP tool for listing Sonar projects
 	duplicationsTool := mcp.NewTool("sonar_duplications",
 		mcp.WithDescription("Get duplications between source files, either within a branch or pull request or for a file in the project."),
 		mcp.WithString("branch",
@@ -44,9 +46,9 @@ func AddDuplicationsTool(s *server.MCPServer) {
 		),
 	)
 
-	// Add the tool to the server
+	// add the tool to the server
 	s.AddTool(duplicationsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Extract the parameters from the request
+		// extract the parameters from the request
 		branch := request.Params.Arguments["branch"].(string)
 		key := request.Params.Arguments["key"].(string)
 		pullRequest := request.Params.Arguments["pull_request"].(string)
@@ -63,5 +65,18 @@ func AddDuplicationsTool(s *server.MCPServer) {
 }
 
 func getDuplications(branch, key, pullRequest string) (string, error) {
-	panic("unimplemented")
+	url := fmt.Sprintf("https://sonarcloud.io/api/duplications/show?branch=%s&key=%s&pullRequest=%s", branch, key, pullRequest)
+
+	body, err := performGetRequest(url)
+	if err != nil {
+		return "", err
+	}
+
+	var response DuplicationsResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal response body: %w", err)
+	}
+
+	return prettyPrint(response)
 }
