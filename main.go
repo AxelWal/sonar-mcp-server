@@ -11,8 +11,10 @@ import (
 var version = "dev"
 
 func main() {
-	var transport string
+	var transport, port, baseURL string
 	flag.StringVar(&transport, "t", "stdio", "Transport type (stdio or sse)")
+	flag.StringVar(&port, "p", "8080", "Port for SSE transport")
+	flag.StringVar(&baseURL, "b", "http://localhost:8080", "Base URL for SSE transport")
 	flag.Parse()
 
 	// Create a new MCP server
@@ -32,9 +34,10 @@ func main() {
 
 	// Only check for "sse" since stdio is the default
 	if transport == "sse" {
-		sseServer := server.NewSSEServer(s, server.WithBaseURL("http://localhost:8080"))
+		sseServer := server.NewSSEServer(s, server.WithBaseURL(baseURL))
+		ssePort := "0.0.0.0:" + port
 		log.Printf("Sonar MCP Server (SSE) listening on :8080")
-		if err := sseServer.Start(":8080"); err != nil {
+		if err := sseServer.Start(ssePort); err != nil {
 			log.Fatalf("Sonar MCP Server (SSE) error: %v", err)
 		}
 	} else {

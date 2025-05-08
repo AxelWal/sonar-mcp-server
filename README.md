@@ -2,7 +2,7 @@
 
 An MCP server implementation for the SonarQube Cloud API in Golang.
 
-## Build and Deploy
+## Build and Release
 
 ```bash
 # to quickly build the latest snapshot
@@ -29,7 +29,16 @@ configuration for the MCP server.
 }
 ```
 
-There is also an HTTP (SSE) mode implemented.
+Alternatively, you can use the MCP introspector for easy local development:
+```bash
+# as stdio binary
+npx @modelcontextprotocol/inspector go run main.go
+
+# as SSE server using 
+go run main.go --transport sse
+npx @modelcontextprotocol/inspector npx mcp-remote@next http://localhost:8080/sse
+npx @modelcontextprotocol/inspector
+```
 
 ## Maintainer
 
