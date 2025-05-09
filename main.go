@@ -34,7 +34,6 @@ func main() {
 	s := server.NewMCPServer(
 		"Sonarcloud API",
 		version,
-		server.WithResourceCapabilities(false, false),
 		server.WithRecovery(),
 		server.WithLogging(),
 	)
