@@ -26,9 +26,11 @@ func AddHotspotsTool(s *server.MCPServer) {
 		),
 		mcp.WithArray("files",
 			mcp.Description("Array or list of file paths. Returns only hotspots found in those files, e.g. src/foo/Bar.php. This parameter is optional."),
+			mcp.DefaultArray([]string{}),
 		),
 		mcp.WithString("status",
 			mcp.Description("The status of the security hotspot, only these are returned, e.g. TO_REVIEW, REVIEWED. This parameter is optional."),
+			mcp.DefaultString(""),
 			mcp.Enum("TO_REVIEW", "REVIEWED"),
 		),
 	)
@@ -37,7 +39,7 @@ func AddHotspotsTool(s *server.MCPServer) {
 	s.AddTool(hotspotsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// extract the parameters from the request
 		projectKey := request.Params.Arguments["projectKey"].(string)
-		files := request.Params.Arguments["files"].([]string)
+		files := request.Params.Arguments["files"].([]interface{})
 		status := request.Params.Arguments["status"].(string)
 
 		// call the Sonarcloud API to get the hotspots
@@ -50,10 +52,10 @@ func AddHotspotsTool(s *server.MCPServer) {
 	})
 }
 
-func searchHotspots(projectKey string, files []string, status string) (string, error) {
+func searchHotspots(projectKey string, files []interface{}, status string) (string, error) {
 	filesParam := ""
 	if len(files) > 0 {
-		filesParam = fmt.Sprintf("&files=%s", strings.Join(files, ","))
+		filesParam = fmt.Sprintf("&files=%s", strings.Join(toStringArray(files), ","))
 	}
 	statusParam := ""
 	if status != "" {
