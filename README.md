@@ -48,14 +48,20 @@ directly from source or using the Docker image built on Github.
 ```bash
 # create a new secret for the SONAR_TOKEN
 gcloud services enable secretmanager.googleapis.com
-echo $SONAR_TOKEN | gcloud secrets create sonar-token --data-file=-
+print $SONAR_TOKEN | gcloud secrets create sonar-token --data-file=-
 
 # next deploy the local build from source to Cloud Run
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
+
+gcloud secrets add-iam-policy-binding sonar-token \
+  --member=serviceAccount:343509396461-compute@developer.gserviceaccount.com \
+  --role=roles/secretmanager.secretAccessor
+
 gcloud run deploy sonar-mcp-server --source=. \
-  --region=eu-north1 \
-  --port=8080 --allow-unauthenticated  \
-  --set-secrets=SONAR_TOKEN=sonar-token  \
+  --region=europe-north1 \
+  --port=8080 --allow-unauthenticated \
+  --set-secrets=SONAR_TOKEN=sonar-token:latest \
+  --set-env-vars=BASE_URL=https://sonar-mcp-server-343509396461.europe-north1.run.app
 ```
 
 ## Maintainer

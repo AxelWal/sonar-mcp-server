@@ -16,6 +16,14 @@ func prettyPrint(data any) (string, error) {
 	return string(jsonData), nil
 }
 
+func toStringArray(issueStatus []interface{}) []string {
+	issueStatusStr := make([]string, len(issueStatus))
+	for i, v := range issueStatus {
+		issueStatusStr[i] = v.(string)
+	}
+	return issueStatusStr
+}
+
 func performGetRequest(url string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

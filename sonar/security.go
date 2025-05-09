@@ -10,6 +10,5 @@ func getSonarToken() string {
 	if sonarToken == "" {
 		log.Fatal("SONAR_TOKEN environment variable is not set")
 	}
-	log.Printf("Using Sonar token: %s", sonarToken)
 	return sonarToken
 }

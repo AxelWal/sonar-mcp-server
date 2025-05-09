@@ -21,6 +21,7 @@ func AddProjectsTool(s *server.MCPServer) {
 		mcp.WithString("organization",
 			mcp.Description("The Sonar cloud organization name, e.g. my_organization."),
 			mcp.Required(),
+			mcp.DefaultString(""),
 		),
 	)
 

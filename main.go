@@ -48,7 +48,7 @@ func main() {
 	if transport == "sse" {
 		sseServer := server.NewSSEServer(s, server.WithBaseURL(baseURL))
 		ssePort := "0.0.0.0:" + port
-		log.Printf("Sonar MCP Server (SSE) listening on :8080")
+		log.Printf("Sonar MCP Server (SSE) listening on %s", ssePort)
 		if err := sseServer.Start(ssePort); err != nil {
 			log.Fatalf("Sonar MCP Server (SSE) error: %v", err)
 		}
