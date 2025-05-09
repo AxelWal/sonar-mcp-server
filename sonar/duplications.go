@@ -25,9 +25,11 @@ func AddDuplicationsTool(s *server.MCPServer) {
 		mcp.WithString("key",
 			// we might need to split the key into project and file
 			mcp.Description("The file key (optional), e.g. my_project:/src/foo/Bar.php"),
+			mcp.DefaultString(""),
 		),
 		mcp.WithString("pullRequest",
 			mcp.Description("The pull request key (optional), e.g. 5461"),
+			mcp.DefaultString(""),
 		),
 	)
 
