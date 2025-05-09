@@ -43,6 +43,7 @@ func main() {
 	sonar.AddHotspotsTool(s)
 	sonar.AddIssuesTool(s)
 	sonar.AddDuplicationsTool(s)
+	sonar.AddMetricsTool(s)
 
 	// Only check for "sse" since stdio is the default
 	if transport == "sse" {

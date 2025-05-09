@@ -133,3 +133,25 @@ type User struct {
 	Active bool   `json:"active"`
 	Avatar string `json:"avatar"`
 }
+
+type Measure struct {
+	Metric    string  `json:"metric"`
+	Value     string  `json:"value"`
+	BestValue bool    `json:"bestValue,omitempty"`
+	Period    *Period `json:"period,omitempty"`
+}
+
+type Period struct {
+	Value     string `json:"value"`
+	BestValue bool   `json:"bestValue,omitempty"`
+}
+
+type MeasuresResponse struct {
+	Component struct {
+		ID        string    `json:"id"`
+		Key       string    `json:"key"`
+		Name      string    `json:"name"`
+		Qualifier string    `json:"qualifier"`
+		Measures  []Measure `json:"measures"`
+	} `json:"component"`
+}
