@@ -3,25 +3,38 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 
 	"github.com/lreimer/sonar-mcp-server/sonar"
 	"github.com/mark3labs/mcp-go/server"
 )
 
-var version = "dev"
+var version string
 
 func main() {
+	// parse command line arguments
 	var transport, port, baseURL string
 	flag.StringVar(&transport, "t", "stdio", "Transport type (stdio or sse)")
 	flag.StringVar(&port, "p", "8080", "Port for SSE transport")
 	flag.StringVar(&baseURL, "b", "http://localhost:8080", "Base URL for SSE transport")
 	flag.Parse()
 
+	// override the default port with ENV if specified
+	// use port parameter as default
+	if envPort, ok := os.LookupEnv("PORT"); ok {
+		port = envPort
+	}
+	// override the default baseURL with ENV if specified
+	// use baseURL parameter as default
+	if envBaseURL, ok := os.LookupEnv("BASE_URL"); ok {
+		baseURL = envBaseURL
+	}
+
 	// Create a new MCP server
 	s := server.NewMCPServer(
 		"Sonarcloud API",
 		version,
-		server.WithResourceCapabilities(true, true),
+		server.WithResourceCapabilities(false, false),
 		server.WithRecovery(),
 		server.WithLogging(),
 	)
