@@ -40,6 +40,24 @@ npx @modelcontextprotocol/inspector npx mcp-remote@next http://localhost:8080/ss
 npx @modelcontextprotocol/inspector
 ```
 
+## Deployment
+
+Currently using manual Google Cloud Run deployment. Can either be deployed
+directly from source or using the Docker image built on Github.
+
+```bash
+# create a new secret for the SONAR_TOKEN
+gcloud services enable secretmanager.googleapis.com
+echo $SONAR_TOKEN | gcloud secrets create sonar-token --data-file=-
+
+# next deploy the local build from source to Cloud Run
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com
+gcloud run deploy sonar-mcp-server --source=. \
+  --region=eu-north1 \
+  --port=8080 --allow-unauthenticated  \
+  --set-secrets=SONAR_TOKEN=sonar-token  \
+```
+
 ## Maintainer
 
 M.-Leander Reimer (@lreimer), <mario-leander.reimer@qaware.de>
