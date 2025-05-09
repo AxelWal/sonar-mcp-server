@@ -62,6 +62,8 @@ gcloud run deploy sonar-mcp-server --source=. \
   --port=8080 --allow-unauthenticated \
   --set-secrets=SONAR_TOKEN=sonar-token:latest \
   --set-env-vars=BASE_URL=https://sonar-mcp-server-343509396461.europe-north1.run.app
+
+gcloud run services delete sonar-mcp-server --async --region=europe-north1
 ```
 
 ## Maintainer
