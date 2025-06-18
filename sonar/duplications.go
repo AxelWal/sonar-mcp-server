@@ -35,17 +35,33 @@ func AddDuplicationsTool(s *server.MCPServer) {
 
 	// add the tool to the server
 	s.AddTool(duplicationsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Recovered in AddDuplicationsTool: %v\n", r)
+			}
+		}()
 		args := request.GetArguments()
-		branch := args["branch"].(string)
-		key := args["key"].(string)
-		pullRequest := args["pullRequest"].(string)
-
+		var branch, key, pullRequest string
+		if v, ok := args["branch"]; ok {
+			if s, ok := v.(string); ok {
+				branch = s
+			}
+		}
+		if v, ok := args["key"]; ok {
+			if s, ok := v.(string); ok {
+				key = s
+			}
+		}
+		if v, ok := args["pullRequest"]; ok {
+			if s, ok := v.(string); ok {
+				pullRequest = s
+			}
+		}
 		// call the Sonarcloud API to get the duplications
 		duplications, err := showDuplications(branch, key, pullRequest)
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("unable to retrieve duplications.", err), nil
 		}
-
 		return mcp.NewToolResultText(duplications), nil
 	})
 }

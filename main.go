@@ -13,11 +13,22 @@ var version string
 
 func main() {
 	// parse command line arguments
-	var transport, port, baseURL string
+	var transport, port, baseURL, logFile string
 	flag.StringVar(&transport, "t", "stdio", "Transport type (stdio or sse)")
 	flag.StringVar(&port, "p", "8080", "Port for SSE transport")
 	flag.StringVar(&baseURL, "b", "http://localhost:8080", "Base URL for SSE transport")
+	flag.StringVar(&logFile, "l", "", "Log file path (optional, logs to stderr by default)")
 	flag.Parse()
+
+	// Set up log file if specified
+	if logFile != "" {
+		f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			log.Fatalf("Failed to open log file: %v", err)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+	}
 
 	// override the default port with ENV if specified
 	// use port parameter as default

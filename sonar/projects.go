@@ -27,16 +27,22 @@ func AddProjectsTool(s *server.MCPServer) {
 
 	// add the tool to the server
 	s.AddTool(projectsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Recovered in AddProjectsTool: %v\n", r)
+			}
+		}()
 		args := request.GetArguments()
-		organization := args["organization"].(string)
-
-		// Call the Sonarcloud API to get the projects
+		var organization string
+		if v, ok := args["organization"]; ok {
+			if s, ok := v.(string); ok {
+				organization = s
+			}
+		}
 		projects, err := searchProjects(organization)
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("unable to retrieve sonar projects.", err), nil
 		}
-
-		// Return the projects as a result
 		return mcp.NewToolResultText(projects), nil
 	})
 }

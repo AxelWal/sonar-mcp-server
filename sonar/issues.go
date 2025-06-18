@@ -60,16 +60,58 @@ func AddIssuesTool(s *server.MCPServer) {
 
 	// add the tool to the server
 	s.AddTool(issuesTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		log.Println("Searching for issues")
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("Recovered in AddIssuesTool: %v", r)
+			}
+		}()
 		// extract the parameters from the request
 		args := request.GetArguments()
-		projectKey := args["projectKey"].(string)
-		organization := args["organization"].(string)
-		branch := args["branch"].(string)
-		pullRequest := args["pullRequest"].(string)
-		issueStatus := args["issueStatus"].([]interface{})
-		impactSeverities := args["impactSeverities"].([]interface{})
-		resolved := args["resolved"].(string)
+
+		var projectKey, organization, branch, pullRequest, resolved string
+		var issueStatus, impactSeverities []interface{}
+
+		if v, ok := args["projectKey"]; ok {
+			if s, ok := v.(string); ok {
+				projectKey = s
+			}
+		}
+
+		if v, ok := args["organization"]; ok {
+			if s, ok := v.(string); ok {
+				organization = s
+			}
+		}
+
+		if v, ok := args["branch"]; ok {
+			if s, ok := v.(string); ok {
+				branch = s
+			}
+		}
+
+		if v, ok := args["pullRequest"]; ok {
+			if s, ok := v.(string); ok {
+				pullRequest = s
+			}
+		}
+
+		if v, ok := args["issueStatus"]; ok {
+			if arr, ok := v.([]interface{}); ok {
+				issueStatus = arr
+			}
+		}
+
+		if v, ok := args["impactSeverities"]; ok {
+			if arr, ok := v.([]interface{}); ok {
+				impactSeverities = arr
+			}
+		}
+
+		if v, ok := args["resolved"]; ok {
+			if s, ok := v.(string); ok {
+				resolved = s
+			}
+		}
 
 		// call the Sonarcloud API to get the issues
 		issues, err := searchIssues(organization, projectKey, branch, pullRequest, issueStatus, resolved, impactSeverities)
@@ -112,7 +154,7 @@ func searchIssues(organization string, projectKey string, branch string, pullReq
 	// construct the URL for the Sonarcloud API
 	url := fmt.Sprintf("https://sonarcloud.io/api/issues/search?projectKeys=%s%s%s%s%s%s%s",
 		projectKey, organizationParam, branchParam, pullRequestParam, issueStatusParam, resolvedParam, impactSeveritiesParam)
-
+	log.Println(url)
 	body, err := performGetRequest(url)
 	if err != nil {
 		return "", err

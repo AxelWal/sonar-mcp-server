@@ -29,16 +29,33 @@ func AddMetricsTool(s *server.MCPServer) {
 	)
 
 	s.AddTool(metricsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Recovered in AddMetricsTool: %v\n", r)
+			}
+		}()
 		args := request.GetArguments()
-		projectKey := args["projectKey"].(string)
-		branch := args["branch"].(string)
-		metricKeys := args["metricKeys"].([]interface{})
-
+		var projectKey, branch string
+		var metricKeys []interface{}
+		if v, ok := args["projectKey"]; ok {
+			if s, ok := v.(string); ok {
+				projectKey = s
+			}
+		}
+		if v, ok := args["branch"]; ok {
+			if s, ok := v.(string); ok {
+				branch = s
+			}
+		}
+		if v, ok := args["metricKeys"]; ok {
+			if arr, ok := v.([]interface{}); ok {
+				metricKeys = arr
+			}
+		}
 		metrics, err := getProjectMetrics(projectKey, branch, metricKeys)
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("unable to retrieve metrics.", err), nil
 		}
-
 		return mcp.NewToolResultText(metrics), nil
 	})
 }
