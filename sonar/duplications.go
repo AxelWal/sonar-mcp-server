@@ -35,10 +35,10 @@ func AddDuplicationsTool(s *server.MCPServer) {
 
 	// add the tool to the server
 	s.AddTool(duplicationsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// extract the parameters from the request
-		branch := request.Params.Arguments["branch"].(string)
-		key := request.Params.Arguments["key"].(string)
-		pullRequest := request.Params.Arguments["pullRequest"].(string)
+		args := request.GetArguments()
+		branch := args["branch"].(string)
+		key := args["key"].(string)
+		pullRequest := args["pullRequest"].(string)
 
 		// call the Sonarcloud API to get the duplications
 		duplications, err := showDuplications(branch, key, pullRequest)

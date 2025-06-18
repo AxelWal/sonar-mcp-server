@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -19,6 +20,7 @@ type IssuesResponse struct {
 }
 
 func AddIssuesTool(s *server.MCPServer) {
+	log.Println("Adding issues tool")
 	// create a new MCP tool for searching Sonar issues
 	issuesTool := mcp.NewTool("sonar_issues",
 		mcp.WithDescription("Search and get all issues for a specified Sonar project."),
@@ -54,16 +56,19 @@ func AddIssuesTool(s *server.MCPServer) {
 
 	// add the tool to the server
 	s.AddTool(issuesTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		log.Println("Searching for issues")
 		// extract the parameters from the request
-		projectKey := request.Params.Arguments["projectKey"].(string)
-		organization := request.Params.Arguments["organization"].(string)
-		branch := request.Params.Arguments["branch"].(string)
-		issueStatus := request.Params.Arguments["issueStatus"].([]interface{})
-		impactSeverities := request.Params.Arguments["impactSeverities"].([]interface{})
-		resolved := request.Params.Arguments["resolved"].(string)
+		args := request.GetArguments()
+		projectKey := args["projectKey"].(string)
+		organization := args["organization"].(string)
+		branch := args["branch"].(string)
+		pullRequest := args["pullRequest"].(string)
+		issueStatus := args["issueStatus"].([]interface{})
+		impactSeverities := args["impactSeverities"].([]interface{})
+		resolved := args["resolved"].(string)
 
 		// call the Sonarcloud API to get the issues
-		issues, err := searchIssues(organization, projectKey, branch, issueStatus, resolved, impactSeverities)
+		issues, err := searchIssues(organization, projectKey, branch, pullRequest, issueStatus, resolved, impactSeverities)
 		if err != nil {
 			return mcp.NewToolResultErrorFromErr("unable to retrieve issues.", err), nil
 		}
@@ -72,7 +77,7 @@ func AddIssuesTool(s *server.MCPServer) {
 	})
 }
 
-func searchIssues(organization string, projectKey string, branch string, issueStatus []interface{}, resolved string, impactSeverities []interface{}) (string, error) {
+func searchIssues(organization string, projectKey string, branch string, pullRequest string, issueStatus []interface{}, resolved string, impactSeverities []interface{}) (string, error) {
 	organizationParam := ""
 	if organization != "" {
 		organizationParam = fmt.Sprintf("&organization=%s", organization)

@@ -29,9 +29,10 @@ func AddMetricsTool(s *server.MCPServer) {
 	)
 
 	s.AddTool(metricsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		projectKey := request.Params.Arguments["projectKey"].(string)
-		branch := request.Params.Arguments["branch"].(string)
-		metricKeys := request.Params.Arguments["metricKeys"].([]interface{})
+		args := request.GetArguments()
+		projectKey := args["projectKey"].(string)
+		branch := args["branch"].(string)
+		metricKeys := args["metricKeys"].([]interface{})
 
 		metrics, err := getProjectMetrics(projectKey, branch, metricKeys)
 		if err != nil {

@@ -37,10 +37,10 @@ func AddHotspotsTool(s *server.MCPServer) {
 
 	// add the tool to the server
 	s.AddTool(hotspotsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// extract the parameters from the request
-		projectKey := request.Params.Arguments["projectKey"].(string)
-		files := request.Params.Arguments["files"].([]interface{})
-		status := request.Params.Arguments["status"].(string)
+		args := request.GetArguments()
+		projectKey := args["projectKey"].(string)
+		files := args["files"].([]interface{})
+		status := args["status"].(string)
 
 		// call the Sonarcloud API to get the hotspots
 		duplications, err := searchHotspots(projectKey, files, status)

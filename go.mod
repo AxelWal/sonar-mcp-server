@@ -3,7 +3,7 @@ module github.com/lreimer/sonar-mcp-server
 go 1.24.2
 
 require (
-	github.com/mark3labs/mcp-go v0.24.1
+	github.com/mark3labs/mcp-go v0.32.01
 	github.com/stretchr/testify v1.9.0
 )
 

@@ -27,8 +27,8 @@ func AddProjectsTool(s *server.MCPServer) {
 
 	// add the tool to the server
 	s.AddTool(projectsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Extract the organization name from the request
-		organization := request.Params.Arguments["organization"].(string)
+		args := request.GetArguments()
+		organization := args["organization"].(string)
 
 		// Call the Sonarcloud API to get the projects
 		projects, err := searchProjects(organization)
