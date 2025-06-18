@@ -37,6 +37,10 @@ func AddIssuesTool(s *server.MCPServer) {
 			mcp.Description("The SCM branch key or name (optional), e.g. feature/my_branch"),
 			mcp.DefaultString("main"),
 		),
+		mcp.WithString("pullRequest",
+			mcp.Description("The pull request ID or key (optional), e.g. 42 or PR-123"),
+			mcp.DefaultString(""),
+		),
 		mcp.WithArray("impactSeverities",
 			mcp.Description("The severity of the issues to be retrieved. Possible values: BLOCKER, HIGH, MEDIUM, LOW, INFO."),
 			mcp.DefaultArray([]string{"BLOCKER", "HIGH"}),
@@ -86,6 +90,10 @@ func searchIssues(organization string, projectKey string, branch string, pullReq
 	if branch != "" {
 		branchParam = fmt.Sprintf("&branch=%s", branch)
 	}
+	pullRequestParam := ""
+	if pullRequest != "" {
+		pullRequestParam = fmt.Sprintf("&pullRequest=%s", pullRequest)
+	}
 	issueStatusParam := ""
 	if len(issueStatus) > 0 {
 		// join the issue statuses with commas
@@ -102,8 +110,8 @@ func searchIssues(organization string, projectKey string, branch string, pullReq
 	}
 
 	// construct the URL for the Sonarcloud API
-	url := fmt.Sprintf("https://sonarcloud.io/api/issues/search?projectKey=%s%s%s%s%s%s",
-		projectKey, organizationParam, branchParam, issueStatusParam, resolvedParam, impactSeveritiesParam)
+	url := fmt.Sprintf("https://sonarcloud.io/api/issues/search?projectKeys=%s%s%s%s%s%s%s",
+		projectKey, organizationParam, branchParam, pullRequestParam, issueStatusParam, resolvedParam, impactSeveritiesParam)
 
 	body, err := performGetRequest(url)
 	if err != nil {
